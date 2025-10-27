@@ -25,13 +25,12 @@ check:
 	uv run ruff check src/ tests/
 	uv run pyright src/ tests/
 
-# Run tests
+# Run tests with coverage (default includes coverage to maintain quality)
 test:
-	uv run pytest tests/
-
-# Run tests with coverage
-test-cov:
 	uv run pytest tests/ --cov=src --cov-report=term-missing
+
+# Alias for test (kept for compatibility)
+test-cov: test
 
 # Format shell scripts
 format-sh:
