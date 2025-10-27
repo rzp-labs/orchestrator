@@ -25,6 +25,7 @@ wheels/
 venv/
 ENV/
 env/
+.envrc
 
 # Testing
 .pytest_cache/
@@ -63,3 +64,4 @@ Thumbs.db
 # Project specific
 logs/triage_metrics.jsonl
 .task_state.json
+triage_results/

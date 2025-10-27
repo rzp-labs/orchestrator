@@ -10,9 +10,10 @@ authors = [
 ]
 
 dependencies = [
-    "click>=8.2.1",              # CLI framework
-    "pydantic>=2.11.7",          # Data validation
+    "click>=8.2.1", # CLI framework
+    "pydantic>=2.11.7", # Data validation
     "pydantic-settings>=2.10.1", # Settings management
+    "requests>=2.32.5",
 ]
 
 [project.optional-dependencies]

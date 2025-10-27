@@ -20,17 +20,9 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv --version
 ```
 
-**linear-cli** (Linear integration):
-```bash
-# Install linear-cli
-npm install -g @linear/cli
-
-# Or via Homebrew (macOS)
-brew install linear-cli
-
-# Verify installation
-linear-cli --version
-```
+**Linear API key**:
+- Get your API key from https://linear.app/settings/api
+- Required for fetching and updating Linear issues
 
 **Claude Code**:
 - Orchestrator uses [Claude Code](https://docs.anthropic.com/en/docs/claude-code) for AI agent delegation
@@ -92,35 +84,36 @@ make test
 
 ## Configuration
 
-### Linear CLI Authentication
+### Linear API Configuration
 
-Authenticate with Linear:
+Get your API key and configure it:
 
 ```bash
-# Login to Linear
-linear-cli auth login
+# Get API key from https://linear.app/settings/api
+# Then set environment variable:
+export LINEAR_API_KEY=lin_api_xxx...
 
-# Verify authentication
-linear-cli me
+# Verify it's set
+echo $LINEAR_API_KEY
+```
+
+Add to your shell profile for persistence (`~/.zshrc` or `~/.bashrc`):
+
+```bash
+# Linear API configuration
+export LINEAR_API_KEY=lin_api_xxx...
 ```
 
 ### Environment Variables
 
-Orchestrator uses these environment variables (all optional):
+Orchestrator uses these environment variables:
 
 ```bash
-# Linear configuration
-export LINEAR_API_KEY="your-api-key"  # If not using linear-cli auth
+# Linear configuration (required)
+export LINEAR_API_KEY="lin_api_xxx..."
 
-# Logging configuration
+# Logging configuration (optional)
 export ORCHESTRATOR_LOG_LEVEL="INFO"  # DEBUG, INFO, WARNING, ERROR
-```
-
-Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
-
-```bash
-# Orchestrator configuration
-export ORCHESTRATOR_LOG_LEVEL="INFO"
 ```
 
 ## Verification
@@ -132,10 +125,10 @@ export ORCHESTRATOR_LOG_LEVEL="INFO"
 uv run orchestrator --help
 
 # Check dependencies
-uv run python -c "import click, pydantic; print('Dependencies OK')"
+uv run python -c "import click, pydantic, requests; print('Dependencies OK')"
 
-# Check linear-cli
-linear-cli --version
+# Check Linear API key
+echo $LINEAR_API_KEY
 ```
 
 ### Run First Triage
@@ -179,36 +172,39 @@ cd orchestrator
 uv sync
 ```
 
-### Linear CLI Not Found
+### Linear API Key Not Set
 
-**Problem**: `linear-cli: command not found`
+**Problem**: `LINEAR_API_KEY environment variable not set`
 
 **Solution**:
 ```bash
-# Install linear-cli globally
-npm install -g @linear/cli
+# Get API key from https://linear.app/settings/api
+# Then set it:
+export LINEAR_API_KEY=lin_api_xxx...
 
-# Or via Homebrew
-brew install linear-cli
+# Add to shell profile for persistence:
+echo 'export LINEAR_API_KEY=lin_api_xxx...' >> ~/.zshrc
 
-# Verify installation
-which linear-cli
+# Reload shell or source the file
+source ~/.zshrc
 ```
 
-### Linear Authentication Failed
+### Linear API Request Failed
 
-**Problem**: `Linear API authentication failed`
+**Problem**: `Linear API request failed`
 
 **Solution**:
 ```bash
-# Re-authenticate
-linear-cli auth login
-
-# Verify authentication
-linear-cli me
-
-# Check API key (if using environment variable)
+# Verify API key is correct
 echo $LINEAR_API_KEY
+
+# Test API key with curl:
+curl -H "Authorization: $LINEAR_API_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "query { viewer { id name } }"}' \
+     https://api.linear.app/graphql
+
+# If invalid, get a new API key from https://linear.app/settings/api
 ```
 
 ### Claude Code Not Found

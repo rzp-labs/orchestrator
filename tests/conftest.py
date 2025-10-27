@@ -1,5 +1,7 @@
 """Pytest fixtures for orchestrator tests."""
 
+import os
+
 import pytest
 
 
@@ -36,3 +38,28 @@ def severity_analysis() -> dict:
         "required_expertise": ["Backend", "Database"],
         "reasoning": "High priority authentication issue affecting all users. Moderate complexity requiring backend investigation.",
     }
+
+
+@pytest.fixture
+def enable_linear_writes():
+    """Temporarily enable Linear writes for testing."""
+    old_value = os.getenv("LINEAR_ENABLE_WRITES")
+    os.environ["LINEAR_ENABLE_WRITES"] = "true"
+    yield
+    if old_value is None:
+        os.environ.pop("LINEAR_ENABLE_WRITES", None)
+    else:
+        os.environ["LINEAR_ENABLE_WRITES"] = old_value
+
+
+@pytest.fixture
+def disable_linear_writes():
+    """Ensure Linear writes are disabled for testing."""
+    old_value = os.getenv("LINEAR_ENABLE_WRITES")
+    os.environ["LINEAR_ENABLE_WRITES"] = "false"
+    yield
+    if old_value is None:
+        os.environ.pop("LINEAR_ENABLE_WRITES", None)
+    else:
+        os.environ["LINEAR_ENABLE_WRITES"] = old_value
+

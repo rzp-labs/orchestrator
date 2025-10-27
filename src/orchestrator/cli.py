@@ -27,6 +27,18 @@ def triage(ticket_id: str) -> None:
 
     Specification: docs/workflows.md lines 29-40
     """
+    from pathlib import Path
+
+    from orchestrator.config import get_linear_writes_enabled, get_write_mode_display
+
+    # Show write mode
+    mode_display = get_write_mode_display()
+    writes_enabled = get_linear_writes_enabled()
+    action_future = "WILL" if writes_enabled else "will NOT"
+    click.echo(f"Mode: {mode_display} - Comments {action_future} be added to Linear")
+    click.echo(f"Beginning analysis for Linear issue {ticket_id}...")
+    click.echo("")
+
     click.echo(f"Fetching ticket {ticket_id}...")
 
     result = execute_triage(ticket_id)
@@ -55,8 +67,18 @@ def triage(ticket_id: str) -> None:
                 click.echo(f"  - Required expertise: {', '.join(result.severity.required_expertise)}")
         click.echo("")
 
+        # Show file save location
+        file_path = Path(f"./triage_results/{ticket_id}.md")
+        click.echo(f"✓ Saved to: {file_path}")
+        click.echo("")
+
         click.echo(f"✓ Triage complete for {ticket_id} ({result.duration:.1f}s total)")
-        click.echo("✓ Updated Linear ticket with AI analysis")
+
+        # Confirm what happened with Linear
+        if writes_enabled:
+            click.echo(f"✓ Posted comment to Linear issue {ticket_id}")
+        else:
+            click.echo("ℹ Linear writes disabled (LINEAR_ENABLE_WRITES=false)")
     else:
         click.echo(f"✗ Triage failed: {result.error}", err=True)
         sys.exit(1)

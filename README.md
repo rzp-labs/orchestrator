@@ -19,7 +19,7 @@ Orchestrator handles tactical product development tasks that typically distract 
 
 - Python 3.11+
 - [uv](https://github.com/astral-sh/uv) for dependency management
-- [linear-cli](https://github.com/schpet/linear-cli) for Linear integration
+- Linear API key (get from https://linear.app/settings/api)
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) for AI agent delegation
 
 ### Installation
@@ -51,7 +51,7 @@ The tool fetches the ticket, delegates analysis to AI agents, and updates Linear
 
 Automates investigation of support tickets:
 
-1. **Fetch ticket** from Linear via `linear-cli`
+1. **Fetch ticket** from Linear via GraphQL API
 2. **Analyze validity** - AI determines if issue is valid and actionable
 3. **Assess severity** - AI estimates complexity and priority
 4. **Update Linear** - Adds AI analysis as comment, sets priority

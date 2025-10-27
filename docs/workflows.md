@@ -15,7 +15,7 @@ Automates investigation of support tickets in Linear.
 
 ### What It Does
 
-1. **Fetches ticket** from Linear using `linear-cli`
+1. **Fetches ticket** from Linear using GraphQL API
 2. **Analyzes validity** - Delegates to `analysis-expert` agent
    - Is this a valid bug/issue?
    - Is it actionable (sufficient info)?
@@ -80,17 +80,15 @@ Updating Linear...
 #### Step 1: Fetch Ticket
 
 ```python
-# Executes via linear-cli
-ticket_json = await retry_cli_command([
-    "linear-cli", "issue", "get", ticket_id, "--json"
-])
+# Executes via Linear GraphQL API
+ticket_data = fetch_issue(ticket_id)
 ```
 
 Retrieves full ticket data including:
 - Title and description
+- Current priority and state
+- Team information
 - Reporter information
-- Labels and project
-- Current status and priority
 
 #### Step 2: Validity Analysis
 
@@ -151,11 +149,8 @@ Agent response includes:
 Updates ticket with AI analysis:
 
 ```python
-await retry_cli_command([
-    "linear-cli", "issue", "update", ticket_id,
-    "--priority", severity_data["severity"],
-    "--comment", format_ai_analysis(validity_data, severity_data)
-])
+priority_level = severity_to_priority(severity.severity)
+update_issue(ticket_id, priority_level, comment)
 ```
 
 Comment format:
@@ -188,7 +183,7 @@ Verify ticket ID is correct and accessible with linear-cli
 **Linear API failure**:
 ```
 Error: Linear API request failed
-Check linear-cli authentication: linear-cli auth login
+Check LINEAR_API_KEY environment variable is set
 ```
 
 **Agent delegation timeout**:

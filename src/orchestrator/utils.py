@@ -9,9 +9,13 @@ import json
 import logging
 import re
 import subprocess
-from typing import Any
+from typing import Any, TypeVar
+
+from pydantic import BaseModel, ValidationError
 
 logger = logging.getLogger(__name__)
+
+T = TypeVar("T", bound=BaseModel)
 
 
 def parse_llm_json(response: str) -> dict[str, Any]:
@@ -174,3 +178,155 @@ def run_agent(agent_name: str, task_description: str, timeout: int = 60) -> str:
     ]
 
     return run_cli_command(command, timeout=timeout).stdout
+
+
+def build_agent_prompt(
+    agent_name: str,
+    task: str,
+    data: dict,
+    schema: type[BaseModel],
+) -> str:
+    """Build agent prompt with explicit JSON schema requirements.
+
+    Creates structured prompt that:
+    - Clearly separates instructions from data
+    - Includes JSON schema from Pydantic model
+    - Provides example output format
+    - Uses delimiters to prevent context contamination
+
+    Args:
+        agent_name: Name of agent being invoked
+        task: High-level task description
+        data: Data to analyze (will be JSON serialized)
+        schema: Pydantic model class defining expected response structure
+
+    Returns:
+        Formatted prompt string with JSON requirements
+
+    Example:
+        >>> prompt = build_agent_prompt(
+        ...     "analysis-expert",
+        ...     "Analyze ticket validity",
+        ...     {"ticket": {...}},
+        ...     ValidityAnalysis
+        ... )
+    """
+    # Get JSON schema from Pydantic model
+    schema_dict = schema.model_json_schema()
+
+    # Build structured prompt with clear delimiters
+    prompt = f"""You are {agent_name}. Your task: {task}
+
+IMPORTANT: Return ONLY valid JSON matching this exact schema. No explanatory text, no markdown wrapping.
+
+Required JSON Schema:
+{json.dumps(schema_dict, indent=2)}
+
+Example format:
+{json.dumps(schema.model_json_schema()['properties'], indent=2)}
+
+===== DATA TO ANALYZE =====
+{json.dumps(data, indent=2)}
+===== END DATA =====
+
+Return your analysis as valid JSON only."""
+
+    return prompt
+
+
+def call_agent_with_retry(
+    agent_name: str,
+    task: str,
+    data: dict,
+    schema: type[T],
+    max_retries: int = 3,
+    timeout: int = 60,
+) -> T:
+    """Call agent with automatic retry on malformed responses.
+
+    Implements defensive pattern from DISCOVERIES.md lines 200-270:
+    - Builds structured prompts requesting JSON
+    - Parses responses defensively with parse_llm_json()
+    - Retries with error feedback if parsing fails
+    - Validates with Pydantic schema
+
+    Args:
+        agent_name: Name of agent to invoke (e.g., "analysis-expert")
+        task: High-level task description
+        data: Data for agent to analyze
+        schema: Pydantic model defining expected response structure
+        max_retries: Maximum retry attempts (default: 3)
+        timeout: Timeout per agent call in seconds (default: 60)
+
+    Returns:
+        Validated Pydantic model instance
+
+    Raises:
+        ValueError: If all retries fail to produce valid JSON
+        ValidationError: If JSON doesn't match Pydantic schema
+
+    Example:
+        >>> validity = call_agent_with_retry(
+        ...     agent_name="analysis-expert",
+        ...     task="Analyze ticket validity",
+        ...     data={"ticket": ticket_data},
+        ...     schema=ValidityAnalysis
+        ... )
+    """
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            # Build prompt with JSON requirements
+            if attempt == 0:
+                prompt = build_agent_prompt(agent_name, task, data, schema)
+            else:
+                # On retry, include feedback about previous error
+                prompt = f"""Previous attempt failed with error: {last_error}
+
+Please try again, ensuring you return ONLY valid JSON with no additional text.
+
+{build_agent_prompt(agent_name, task, data, schema)}"""
+
+            logger.debug(
+                f"Agent call attempt {attempt + 1}/{max_retries} for {agent_name}"
+            )
+
+            # Call agent
+            response = run_agent(agent_name, prompt, timeout=timeout)
+
+            # Parse JSON defensively
+            try:
+                json_data = parse_llm_json(response)
+            except ValueError as e:
+                last_error = str(e)
+                logger.warning(
+                    f"Attempt {attempt + 1} failed to parse JSON: {last_error}"
+                )
+                if attempt < max_retries - 1:
+                    continue
+                raise
+
+            # Validate with Pydantic schema
+            try:
+                return schema(**json_data)
+            except ValidationError as e:
+                last_error = f"Schema validation failed: {e}"
+                logger.warning(
+                    f"Attempt {attempt + 1} failed validation: {last_error}"
+                )
+                if attempt < max_retries - 1:
+                    continue
+                raise
+
+        except Exception as e:
+            last_error = str(e)
+            logger.warning(f"Attempt {attempt + 1} failed: {last_error}")
+            if attempt < max_retries - 1:
+                continue
+            raise
+
+    # Should never reach here due to raise in loop, but for type safety
+    raise ValueError(
+        f"All {max_retries} attempts failed. Last error: {last_error}"
+    )

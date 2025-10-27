@@ -40,4 +40,4 @@ class TriageResult(BaseModel):
     success: bool = Field(..., description="Whether triage completed successfully")
     duration: float = Field(..., description="Total execution time in seconds")
     agents_used: list[str] = Field(default_factory=list, description="List of agents delegated to")
-    error: str | None = Field(default=None, description="Error message if success=False")
+    error: str | None = None  # Error message if success=False
