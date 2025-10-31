@@ -34,8 +34,12 @@ class TriageResult(BaseModel):
 
     ticket_id: str = Field(..., description="Linear ticket identifier")
     ticket_url: str = Field(..., description="URL to Linear ticket")
-    validity: ValidityAnalysis | None = Field(default=None, description="Validity analysis result (None if triage failed)")
-    severity: SeverityAnalysis | None = Field(default=None, description="Severity assessment result (None if triage failed)")
+    validity: ValidityAnalysis | None = Field(
+        default=None, description="Validity analysis result (None if triage failed)"
+    )
+    severity: SeverityAnalysis | None = Field(
+        default=None, description="Severity assessment result (None if triage failed)"
+    )
     ai_comment: str = Field(..., description="Formatted AI analysis comment for Linear")
     success: bool = Field(..., description="Whether triage completed successfully")
     duration: float = Field(..., description="Total execution time in seconds")

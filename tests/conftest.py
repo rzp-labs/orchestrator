@@ -62,4 +62,3 @@ def disable_linear_writes():
         os.environ.pop("LINEAR_ENABLE_WRITES", None)
     else:
         os.environ["LINEAR_ENABLE_WRITES"] = old_value
-

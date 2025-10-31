@@ -115,8 +115,7 @@ def run_cli_command(
             logger.debug(f"Command succeeded: {' '.join(command)}")
         else:
             logger.warning(
-                f"Command failed with code {result.returncode}: {' '.join(command)}\n"
-                f"stderr: {result.stderr}"
+                f"Command failed with code {result.returncode}: {' '.join(command)}\nstderr: {result.stderr}"
             )
 
         return result
@@ -130,10 +129,7 @@ def run_cli_command(
         raise
 
     except subprocess.CalledProcessError as e:
-        logger.error(
-            f"Command failed with code {e.returncode}: {' '.join(command)}\n"
-            f"stderr: {e.stderr}"
-        )
+        logger.error(f"Command failed with code {e.returncode}: {' '.join(command)}\nstderr: {e.stderr}")
         raise
 
 
@@ -223,7 +219,7 @@ Required JSON Schema:
 {json.dumps(schema_dict, indent=2)}
 
 Example format:
-{json.dumps(schema.model_json_schema()['properties'], indent=2)}
+{json.dumps(schema.model_json_schema()["properties"], indent=2)}
 
 ===== DATA TO ANALYZE =====
 {json.dumps(data, indent=2)}
@@ -288,9 +284,7 @@ Please try again, ensuring you return ONLY valid JSON with no additional text.
 
 {build_agent_prompt(agent_name, task, data, schema)}"""
 
-            logger.debug(
-                f"Agent call attempt {attempt + 1}/{max_retries} for {agent_name}"
-            )
+            logger.debug(f"Agent call attempt {attempt + 1}/{max_retries} for {agent_name}")
 
             # Call agent
             response = run_agent(agent_name, prompt, timeout=timeout)
@@ -300,9 +294,7 @@ Please try again, ensuring you return ONLY valid JSON with no additional text.
                 json_data = parse_llm_json(response)
             except ValueError as e:
                 last_error = str(e)
-                logger.warning(
-                    f"Attempt {attempt + 1} failed to parse JSON: {last_error}"
-                )
+                logger.warning(f"Attempt {attempt + 1} failed to parse JSON: {last_error}")
                 if attempt < max_retries - 1:
                     continue
                 raise
@@ -312,9 +304,7 @@ Please try again, ensuring you return ONLY valid JSON with no additional text.
                 return schema(**json_data)
             except ValidationError as e:
                 last_error = f"Schema validation failed: {e}"
-                logger.warning(
-                    f"Attempt {attempt + 1} failed validation: {last_error}"
-                )
+                logger.warning(f"Attempt {attempt + 1} failed validation: {last_error}")
                 if attempt < max_retries - 1:
                     continue
                 raise
@@ -327,6 +317,4 @@ Please try again, ensuring you return ONLY valid JSON with no additional text.
             raise
 
     # Should never reach here due to raise in loop, but for type safety
-    raise ValueError(
-        f"All {max_retries} attempts failed. Last error: {last_error}"
-    )
+    raise ValueError(f"All {max_retries} attempts failed. Last error: {last_error}")

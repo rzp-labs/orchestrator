@@ -29,8 +29,7 @@ def _get_api_key() -> str:
     api_key = os.environ.get("LINEAR_API_KEY")
     if not api_key:
         raise RuntimeError(
-            "LINEAR_API_KEY environment variable not set. "
-            "Get your API key from https://linear.app/settings/api"
+            "LINEAR_API_KEY environment variable not set. Get your API key from https://linear.app/settings/api"
         )
     return api_key
 
@@ -137,8 +136,7 @@ def update_issue(issue_id: str, priority: int, comment: str) -> None:
     """
     if not get_linear_writes_enabled():
         logger.info(
-            f"[READ-ONLY] Skipping Linear update for {issue_id} "
-            f"(priority={priority}, comment={len(comment)} chars)"
+            f"[READ-ONLY] Skipping Linear update for {issue_id} (priority={priority}, comment={len(comment)} chars)"
         )
         return
 
