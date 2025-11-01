@@ -3,11 +3,8 @@
 import subprocess
 from unittest.mock import patch
 
-from orchestrator.models import SeverityAnalysis
-from orchestrator.models import ValidityAnalysis
-from orchestrator.triage import execute_triage
-from orchestrator.triage import format_ai_comment
-from orchestrator.triage import severity_to_priority
+from orchestrator.models import SeverityAnalysis, ValidityAnalysis
+from orchestrator.triage import execute_triage, format_ai_comment, severity_to_priority
 
 
 class TestExecuteTriage:

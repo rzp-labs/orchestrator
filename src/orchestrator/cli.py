@@ -29,8 +29,7 @@ def triage(ticket_id: str) -> None:
     """
     from pathlib import Path
 
-    from orchestrator.config import get_linear_writes_enabled
-    from orchestrator.config import get_write_mode_display
+    from orchestrator.config import get_linear_writes_enabled, get_write_mode_display
 
     # Show write mode
     mode_display = get_write_mode_display()

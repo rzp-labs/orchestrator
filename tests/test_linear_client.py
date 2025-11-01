@@ -1,14 +1,12 @@
 """Tests for Linear GraphQL API client."""
 
 import os
-from unittest.mock import MagicMock
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 
-from orchestrator.linear_client import fetch_issue
-from orchestrator.linear_client import update_issue
+from orchestrator.linear_client import fetch_issue, update_issue
 
 
 class TestFetchIssue:

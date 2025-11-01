@@ -13,14 +13,10 @@ rather than raising exceptions, allowing for graceful error handling.
 import logging
 import time
 
-from orchestrator.config import get_linear_writes_enabled
-from orchestrator.config import get_write_mode_display
+from orchestrator.config import get_linear_writes_enabled, get_write_mode_display
 from orchestrator.file_writer import save_analysis
-from orchestrator.linear_client import fetch_issue
-from orchestrator.linear_client import update_issue
-from orchestrator.models import SeverityAnalysis
-from orchestrator.models import TriageResult
-from orchestrator.models import ValidityAnalysis
+from orchestrator.linear_client import fetch_issue, update_issue
+from orchestrator.models import SeverityAnalysis, TriageResult, ValidityAnalysis
 from orchestrator.utils import call_agent_with_retry
 
 logger = logging.getLogger(__name__)
