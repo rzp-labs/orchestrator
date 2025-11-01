@@ -5,7 +5,9 @@ from unittest.mock import patch
 
 import pytest
 
-from orchestrator.utils import parse_llm_json, run_agent, run_cli_command
+from orchestrator.utils import parse_llm_json
+from orchestrator.utils import run_agent
+from orchestrator.utils import run_cli_command
 
 
 class TestParseLlmJson:

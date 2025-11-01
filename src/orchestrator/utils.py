@@ -9,9 +9,11 @@ import json
 import logging
 import re
 import subprocess
-from typing import Any, TypeVar
+from typing import Any
+from typing import TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
+from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
 
