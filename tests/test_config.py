@@ -2,7 +2,8 @@
 
 import os
 
-from orchestrator.config import get_linear_writes_enabled, get_write_mode_display
+from orchestrator.config import get_linear_writes_enabled
+from orchestrator.config import get_write_mode_display
 
 
 class TestLinearWritesConfig:

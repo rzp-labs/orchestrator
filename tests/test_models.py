@@ -2,7 +2,9 @@
 
 import pytest
 
-from orchestrator.models import SeverityAnalysis, TriageResult, ValidityAnalysis
+from orchestrator.models import SeverityAnalysis
+from orchestrator.models import TriageResult
+from orchestrator.models import ValidityAnalysis
 
 
 def test_validity_analysis_valid(validity_analysis):

@@ -5,7 +5,8 @@ providing durable storage of expensive LLM analyses.
 """
 
 import logging
-from datetime import UTC, datetime
+from datetime import UTC
+from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
