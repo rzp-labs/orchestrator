@@ -2,27 +2,23 @@
 
 This file provides guidance to Claude Code when working with code in this repository.
 
-## Important: Consult Parent Workspace Context
+This project is a **git submodule** within the Amplifier workspace.
 
-This project is a **git submodule** within the Amplifier workspace. Before working on tasks:
+This project uses a shared context file (`AGENTS.md`) for common project guidelines. Please refer to it for information on build commands, code style, and design philosophy.
 
-1. **Read this file first** - Orchestrator-specific instructions
-2. **Reference parent workspace** - `@../AGENTS.md` and `@../CLAUDE.md` for shared patterns
-3. **Check DISCOVERIES.md** - Both orchestrator and parent workspace versions
-4. **Review philosophy docs** - `@../ai_context/IMPLEMENTATION_PHILOSOPHY.md` and `@../ai_context/MODULAR_DESIGN_PHILOSOPHY.md`
+This file is reserved for Claude Code-specific instructions.
 
-## Import Key Context Files
+# import the following files (using the `@` syntax):
 
-Use the `@` syntax to reference these files:
-
-- `@AGENTS.md` - This project's AI guidance
-- `@../AGENTS.md` - Parent workspace AI guidance
-- `@../CLAUDE.md` - Parent workspace Claude Code guidance
-- `@../DISCOVERIES.md` - Parent workspace discoveries and patterns
-- `@../ai_context/IMPLEMENTATION_PHILOSOPHY.md` - Ruthless simplicity philosophy
-- `@../ai_context/MODULAR_DESIGN_PHILOSOPHY.md` - Modular design principles
-- `@docs/architecture.md` - Orchestrator architecture details
-- `@docs/workflows.md` - Workflow specifications
+- @AGENTS.md
+- @../AGENTS.md
+- @../CLAUDE.md
+- @DISCOVERIES.md
+- @../DISCOVERIES.md
+- @../ai_context/IMPLEMENTATION_PHILOSOPHY.md
+- @../ai_context/MODULAR_DESIGN_PHILOSOPHY.md
+- @docs/architecture.md
+- @docs/workflows.md
 
 ## Project Context
 

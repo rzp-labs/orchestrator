@@ -13,7 +13,7 @@ Orchestrator is an **AI-powered orchestrator for tactical product development wo
 - Read-only/write mode control for safe testing
 - Metrics collection for workflow optimization
 
-**Philosophy**: This project follows ruthless simplicity and modular design principles. It's a standalone git submodule developed using the Amplifier framework.
+**Philosophy**: This project follows ruthless simplicity and modular design principles. It's a standalone git submodule developed using the Amplifier framework. For comprehensive context on these principles, see the parent workspace's @../AGENTS.md and @../CLAUDE.md.
 
 ## Important: This is a Git Submodule
 
@@ -250,6 +250,8 @@ orchestrator/
 ```
 
 ## Philosophy Alignment
+
+This project implements the core philosophies defined in the parent workspace (@../ai_context/IMPLEMENTATION_PHILOSOPHY.md and @../ai_context/MODULAR_DESIGN_PHILOSOPHY.md). The parent workspace contains the canonical philosophy documentation. Below are key principles as applied to Orchestrator:
 
 ### Ruthless Simplicity
 
