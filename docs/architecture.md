@@ -30,18 +30,25 @@ User Manual Invocation
         ↓
     Click CLI (cli.py)
         ↓
-   Workflow (triage.py)
+   ┌────┴────┐
+   ↓         ↓
+Triage   Investigation
+   ↓         ↓
+   ↓    Linear History Research
+   ↓         ↓
+   ↓    Pattern Synthesis
+   ↓         ↓
+   ↓    Citation Tracking
+   ↓         ↓
+   ↓    Learning Store
+   ↓         ↓
+   └────┬────┘
         ↓
-    ┌───┴───┬────────┬──────────┐
-    ↓       ↓        ↓          ↓
-linear-cli  claude  utils   models
-    ↓       ↓        ↓          ↓
-Fetch   Delegate  Parse    Validate
-Ticket  Analysis  JSON     Data
-    ↓       ↓        ↓          ↓
-    └───┬───┴────────┴──────────┘
+   Utils & Models
         ↓
-   Update Linear
+   Defensive Parsing
+        ↓
+   Update Linear (optional)
         ↓
    Hook (post-execution)
         ↓
@@ -52,32 +59,61 @@ Ticket  Analysis  JSON     Data
 
 ### Core Python Modules
 
-**models.py** (~100 lines)
-- Pydantic data models
-- TriageInput, ValidityAnalysis, SeverityAnalysis, TriageResult
+**models.py** (~150 lines)
+- Pydantic data models for all workflows
+- Triage: TriageInput, ValidityAnalysis, SeverityAnalysis, TriageResult
+- Investigation: Citation, Finding, Recommendation, InvestigationResult, PatternMatch
 - Data validation and serialization
 
 **utils.py** (~150 lines)
-- `parse_llm_json()` - Extract JSON from any LLM response
+- `parse_llm_json()` - Extract JSON from any LLM response format
 - `retry_cli_command()` - Execute CLI with exponential backoff
 - `run_agent()` - Delegate tasks to Claude Code agents
 
 **triage.py** (~150 lines)
-- Main workflow orchestration
-- Coordinates: fetch → analyze → assess → update
+- Triage workflow orchestration
+- Coordinates: fetch → analyze validity → assess severity → update
 - Error handling and progress reporting
 
-**cli.py** (~80 lines)
-- Click CLI interface
-- Command routing
-- Progress indicators
+**investigation.py** (~150 lines)
+- Investigation workflow orchestration
+- Coordinates: fetch issue → research history → synthesize → recommend → learn
+- File-based result saving to investigation_results/
+
+**linear_history.py** (~120 lines)
+- Research Linear issue history via GraphQL API
+- Find similar issues by labels, components, text patterns
+- Extract resolution patterns and team expertise
+- Return citation data (issue ID, URL, excerpt)
+
+**citation_tracker.py** (~80 lines)
+- Manage citation collection and validation
+- Ensure all findings have ≥1 citation with direct links
+- Format citations for markdown output
+
+**learning_store.py** (~100 lines)
+- File-based pattern tracking (data/patterns.jsonl)
+- Record: issue pattern → recommendation → outcome
+- Find matching patterns for new issues
+- Update patterns with resolution outcomes
+
+**cli.py** (~120 lines)
+- Click CLI interface with two commands
+- triage command - Support ticket analysis
+- investigate command - Issue investigation
+- Progress indicators and error handling
 
 ### Claude Code Hooks
 
 **hook_post_triage.py** (~60 lines)
-- Reads workflow result from stdin
+- Reads triage workflow result from stdin
 - Logs metrics to `logs/triage_metrics.jsonl`
 - Returns metadata to stdout (Claude Code protocol)
+
+**hook_post_investigation.py** (~60 lines)
+- Reads investigation workflow result from stdin
+- Logs metrics to `logs/investigation_metrics.jsonl`
+- Tracks citation count, pattern matches, recommendations
 
 **hook_logger.py** (~80 lines)
 - Shared logging utility (from amplifier)
@@ -149,6 +185,44 @@ json.dump({"metadata": {...}}, sys.stdout)
 - `parse_llm_json()` - Handles markdown blocks, explanations, malformed JSON
 - `retry_cli_command()` - Exponential backoff for transient failures
 - Patterns from amplifier's `@DISCOVERIES.md` (lines 442-502)
+
+### Decision: Mandatory Citations
+
+**Rationale**: Investigation recommendations must be evidence-based and traceable. Generic "similar issues exist" claims are not actionable. Citations enable users to verify reasoning and explore context.
+
+**Implementation**:
+- Pydantic models enforce `min_length=1` on citation lists
+- Every Finding requires ≥1 Citation with source URL
+- Every Recommendation requires ≥1 Citation linking to evidence
+- Citations include: source_type, source_id, source_url, excerpt, timestamp
+- Output markdown includes direct links to all cited Linear issues
+
+**Why it matters**: Teams can verify AI reasoning, follow up on patterns, and trust recommendations are grounded in real data, not speculation.
+
+### Decision: Linear History as Single Source
+
+**Rationale**: Start simple with one valuable data source before adding complexity.
+
+**Why Linear history**:
+- Already have Linear GraphQL API client
+- Rich context: issue patterns, resolution paths, team discussions
+- High value: "Similar issues resolved as X" is immediately actionable
+- Minimal infrastructure: just GraphQL queries
+
+**Future expansion**: Can add Git history, codebase analysis, logs later without refactoring. Investigation workflow designed to accept multiple sources through modular architecture.
+
+### Decision: File-Based Learning Store
+
+**Rationale**: Simple pattern tracking without database complexity.
+
+**Implementation**:
+- JSONL file at `data/patterns.jsonl`
+- Each pattern: issue_pattern → recommendation → outcome → confidence
+- Find matches via text similarity
+- Update outcomes when issues close
+- Confidence increases as patterns prove successful
+
+**Why file-based**: Follows orchestrator philosophy of ruthless simplicity. Can migrate to database later if needed, but JSONL is sufficient for 1000s of patterns with fast grep-based search.
 
 ## Technology Stack
 
