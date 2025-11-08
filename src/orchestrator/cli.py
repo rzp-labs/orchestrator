@@ -84,5 +84,56 @@ def triage(ticket_id: str) -> None:
         sys.exit(1)
 
 
+@cli.command()
+@click.argument("issue_id")
+def investigate(issue_id: str) -> None:
+    """Research Linear issue history and provide evidence-based recommendations.
+
+    Usage: orchestrator investigate ABC-456
+
+    Specification: docs/workflows.md lines 200-250
+    """
+    from pathlib import Path
+
+    from orchestrator.investigation import execute_investigation
+
+    click.echo(f"Beginning investigation for Linear issue {issue_id}...")
+    click.echo("")
+
+    click.echo(f"Fetching issue {issue_id}...")
+
+    result = execute_investigation(issue_id)
+
+    if result.success:
+        click.echo(f"✓ Issue fetched: {result.issue_url}")
+        click.echo("")
+
+        click.echo(f"Researching Linear history... (found {result.similar_issues_count} similar issues)")
+        click.echo("✓ Research complete")
+        click.echo("")
+
+        click.echo(f"Synthesizing findings... ({len(result.findings)} findings)")
+        click.echo("✓ Synthesis complete")
+        click.echo("")
+
+        click.echo(f"Generating recommendations... ({len(result.recommendations)} recommendations)")
+        click.echo("✓ Recommendations generated")
+        click.echo("")
+
+        # Show file save location
+        file_path = Path(f"./investigation_results/{issue_id}.md")
+        click.echo(f"✓ Saved to: {file_path}")
+        click.echo("")
+
+        click.echo(f"✓ Investigation complete for {issue_id} ({result.duration:.1f}s total)")
+        click.echo(f"  - Findings: {len(result.findings)}")
+        click.echo(f"  - Recommendations: {len(result.recommendations)}")
+        click.echo(f"  - Pattern matches: {len(result.pattern_matches)}")
+        click.echo(f"  - Citations: {result.citations_count}")
+    else:
+        click.echo(f"✗ Investigation failed: {result.error}", err=True)
+        sys.exit(1)
+
+
 if __name__ == "__main__":
     cli()
